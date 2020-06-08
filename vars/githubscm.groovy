@@ -84,20 +84,13 @@ def getRemoteInfo(String remoteName, String configName) {
     return sh(returnStdout: true, script: "git config --get remote.${remoteName}.${configName}").trim()    
 }
 
-def tag(String tagName) {
+def tag(String tagUserName, String tagUserEmail, String tagName) {
     sh("""
-        git config user.email 'test@example.com'
-        git config user.name 'Test'
+        git config user.name '${tagUserName}'
+        git config user.email '${tagUserEmail}'
         git tag -a ${tagName} -m 'Tagging ${tagName}.'
     """)
     
-    // sshagent(['nzxt-ssh']) {
-        // sh("""
-            // #!/usr/bin/env bash
-            // set +x
-            // git push origin ${tagName}
-         // """)
-    // }
     withCredentials([usernamePassword(credentialsId: 'jenkins-nzxt-2', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){    
         sh("""
             git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
