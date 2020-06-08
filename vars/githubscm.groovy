@@ -85,6 +85,8 @@ def getRemoteInfo(String remoteName, String configName) {
 }
 
 def tag(String tagName) {
+    sh "git config user.email 'test@example.com'"
+    sh "git config user.name 'Test'"
     sh "git tag -a ${tagName} -m 'Tagging ${tagName}'"
     sh "git push origin ${tagName}"
 }
