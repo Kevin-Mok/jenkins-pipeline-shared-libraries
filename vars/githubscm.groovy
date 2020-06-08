@@ -1,7 +1,7 @@
 def resolveRepository(String repository, String author, String branches, boolean ignoreErrors) {
     return resolveScm(
             source: github(
-                    credentialsId: 'nzxt-ssh',
+                    credentialsId: 'jenkins-nzxt-2',
                     repoOwner: author,
                     repository: repository,
                     traits: [[$class: 'org.jenkinsci.plugins.github_branch_source.BranchDiscoveryTrait', strategyId: 3],
@@ -91,12 +91,18 @@ def tag(String tagName) {
         git tag -a ${tagName} -m 'Tagging ${tagName}.'
     """)
     
-    sshagent(['nzxt-ssh']) {
+    // sshagent(['nzxt-ssh']) {
+        // sh("""
+            // #!/usr/bin/env bash
+            // set +x
+            // git push origin ${tagName}
+         // """)
+    // }
+    withCredentials([usernamePassword(credentialsId: 'jenkins-nzxt-2', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){    
         sh("""
-            #!/usr/bin/env bash
-            set +x
+            git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
             git push origin ${tagName}
-         """)
+        """)
     }
 }
 
