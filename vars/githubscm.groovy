@@ -83,3 +83,9 @@ def getBranch() {
 def getRemoteInfo(String remoteName, String configName) {
     return sh(returnStdout: true, script: "git config --get remote.${remoteName}.${configName}").trim()    
 }
+
+def tag(String tagName) {
+    sh "git tag -a ${tagName} -m 'Tagging ${tagName}'"
+    sh "git push origin ${tagName}"
+}
+
