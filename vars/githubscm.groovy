@@ -1,7 +1,7 @@
 def resolveRepository(String repository, String author, String branches, boolean ignoreErrors) {
     return resolveScm(
             source: github(
-                    credentialsId: 'jenkins-nzxt-2',
+                    credentialsId: 'jenkins-kogito',
                     repoOwner: author,
                     repository: repository,
                     traits: [[$class: 'org.jenkinsci.plugins.github_branch_source.BranchDiscoveryTrait', strategyId: 3],
@@ -94,15 +94,15 @@ def tagRepository(String repository, String author, String branch, String tagUse
     """)
     
     try {
-        withCredentials([usernamePassword(credentialsId: 'jenkins-nzxt-2', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){    
+        withCredentials([usernamePassword(credentialsId: 'jenkins-kogito', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){    
             sh("""
                 git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
                 git push origin ${tagName}
             """)
         }
     } catch (Exception e) {
-        println "[ERROR] Can't push existing tag ${tagName} to server."
+        println "[ERROR] Can't push existing tag ${tagName} to remote."
         throw e;
     }
-    println "[INFO] Pushed tag ${tagName} to server."
+    println "[INFO] Pushed tag ${tagName} to remote."
 }
