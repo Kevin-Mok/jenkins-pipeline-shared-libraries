@@ -72,21 +72,10 @@ Target: ${targetCommit}
     """
 }
 
-def getCommit() {
-    return sh(returnStdout: true, script: 'git log --oneline -1').trim()
-}
-
-def getBranch() {
-    return sh(returnStdout: true, script: 'git branch --all --contains HEAD').trim()
-}
-
-def getRemoteInfo(String remoteName, String configName) {
-    return sh(returnStdout: true, script: "git config --get remote.${remoteName}.${configName}").trim()    
-}
-
 def tagRepository(String repository, String author, String branch, String tagUserName, String tagUserEmail, String tagName) {
-    println "[INFO] Tagging the current commit in [${author}/${repository}:${branch}] with ${tagName} as ${tagUserName} (${tagUserEmail})..."
     checkout(resolveRepository(repository, author, branch, false))
+    def currentCommit = getCommit()
+    println "[INFO] Tagging commit '${currentCommit}' in [${author}/${repository}:${branch}] with ${tagName} as ${tagUserName} (${tagUserEmail})..."
     sh("""
         git config user.name '${tagUserName}'
         git config user.email '${tagUserEmail}'
@@ -104,5 +93,17 @@ def tagRepository(String repository, String author, String branch, String tagUse
         println "[ERROR] Can't push existing tag ${tagName} to remote."
         throw e;
     }
-    println "[INFO] Pushed tag ${tagName} to remote."
+    println "[INFO] Pushed commit '${currentCommit}' as tag ${tagName} to remote."
+}
+
+def getCommit() {
+    return sh(returnStdout: true, script: 'git log --oneline -1').trim()
+}
+
+def getBranch() {
+    return sh(returnStdout: true, script: 'git branch --all --contains HEAD').trim()
+}
+
+def getRemoteInfo(String remoteName, String configName) {
+    return sh(returnStdout: true, script: "git config --get remote.${remoteName}.${configName}").trim()    
 }
