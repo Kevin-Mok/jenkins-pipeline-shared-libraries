@@ -100,6 +100,7 @@ def tag(String tagUserName, String tagUserEmail, String tagName) {
 }
 
 def tagRepository(String repository, String author, String branch, String tagUserName, String tagUserEmail, String tagName) {
+    println "[INFO] Tagging the current commit in [${author}/${repository}:${branch}] with ${tagName} as ${tagUserName} (${tagUserEmail})..."
     checkout(resolveRepository(repository, author, branch, false))
     sh("""
         git config user.name '${tagUserName}'
@@ -107,11 +108,17 @@ def tagRepository(String repository, String author, String branch, String tagUse
         git tag -a ${tagName} -m 'Tagging ${tagName}.'
     """)
     
-    withCredentials([usernamePassword(credentialsId: 'jenkins-nzxt-2', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){    
-        sh("""
-            git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
-            git push origin ${tagName}
-        """)
+    try {
+        withCredentials([usernamePassword(credentialsId: 'jenkins-nzxt-2', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){    
+            sh("""
+                git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
+                git push origin ${tagName}
+            """)
+        }
+    } catch (Exception e) {
+        println "[ERROR] Can't push existing tag ${tagName} to server."
+        throw e;
     }
+    println "[INFO] Pushed tag ${tagName} to server."
 }
 
