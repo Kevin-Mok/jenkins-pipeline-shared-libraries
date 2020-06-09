@@ -84,21 +84,6 @@ def getRemoteInfo(String remoteName, String configName) {
     return sh(returnStdout: true, script: "git config --get remote.${remoteName}.${configName}").trim()    
 }
 
-def tag(String tagUserName, String tagUserEmail, String tagName) {
-    sh("""
-        git config user.name '${tagUserName}'
-        git config user.email '${tagUserEmail}'
-        git tag -a ${tagName} -m 'Tagging ${tagName}.'
-    """)
-    
-    withCredentials([usernamePassword(credentialsId: 'jenkins-kogito', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){    
-        sh("""
-            git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
-            git push origin ${tagName}
-        """)
-    }
-}
-
 def tagRepository(String repository, String author, String branch, String tagUserName, String tagUserEmail, String tagName) {
     println "[INFO] Tagging the current commit in [${author}/${repository}:${branch}] with ${tagName} as ${tagUserName} (${tagUserEmail})..."
     checkout(resolveRepository(repository, author, branch, false))
@@ -121,4 +106,3 @@ def tagRepository(String repository, String author, String branch, String tagUse
     }
     println "[INFO] Pushed tag ${tagName} to server."
 }
-
