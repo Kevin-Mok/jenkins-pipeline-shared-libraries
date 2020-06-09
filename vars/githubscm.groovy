@@ -1,7 +1,7 @@
 def resolveRepository(String repository, String author, String branches, boolean ignoreErrors) {
     return resolveScm(
             source: github(
-                    credentialsId: 'jenkins-kogito',
+                    credentialsId: 'jenkins-nzxt-2',
                     repoOwner: author,
                     repository: repository,
                     traits: [[$class: 'org.jenkinsci.plugins.github_branch_source.BranchDiscoveryTrait', strategyId: 3],
@@ -92,6 +92,22 @@ def tag(String tagUserName, String tagUserEmail, String tagName) {
     """)
     
     withCredentials([usernamePassword(credentialsId: 'jenkins-kogito', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){    
+        sh("""
+            git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
+            git push origin ${tagName}
+        """)
+    }
+}
+
+def tagRepository(String repository, String author, String branch, String tagUserName, String tagUserEmail, String tagName) {
+    checkout(resolveRepository(repository, author, branch, false))
+    sh("""
+        git config user.name '${tagUserName}'
+        git config user.email '${tagUserEmail}'
+        git tag -a ${tagName} -m 'Tagging ${tagName}.'
+    """)
+    
+    withCredentials([usernamePassword(credentialsId: 'jenkins-nzxt-2', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){    
         sh("""
             git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
             git push origin ${tagName}
