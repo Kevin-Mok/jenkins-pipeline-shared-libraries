@@ -75,7 +75,15 @@ Target: ${targetCommit}
 def tagRepository(String repository, String author, String branch, String tagUserName, String tagUserEmail, String tagName) {
     checkout(resolveRepository(repository, author, branch, false))
     def currentCommit = getCommit()
-    println "[INFO] Tagging commit '${currentCommit}' in [${author}/${repository}:${branch}] with ${tagName} as ${tagUserName} (${tagUserEmail})..."
+    println """
+-------------------------------------------------------------
+[INFO] Tagging ${author}/${repository}:${branch}
+-------------------------------------------------------------
+Commit: ${currentCommit}
+Tagger: ${tagUserName} (${tagUserEmail})
+Tag: ${tagName}
+-------------------------------------------------------------
+"""
     sh("""
         git config user.name '${tagUserName}'
         git config user.email '${tagUserEmail}'
