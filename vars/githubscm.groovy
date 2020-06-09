@@ -74,6 +74,38 @@ def mergeSourceIntoTarget(String repository, String sourceAuthor, String sourceB
     """
 }
 
+def tagRepository(String repository, String author, String branch, String tagUserName, String tagUserEmail, String tagName) {
+    checkout(resolveRepository(repository, author, branch, false))
+    def currentCommit = getCommit()
+    println """
+-------------------------------------------------------------
+[INFO] Tagging ${author}/${repository}:${branch}
+-------------------------------------------------------------
+Commit: ${currentCommit}
+Tagger: ${tagUserName} (${tagUserEmail})
+Tag: ${tagName}
+-------------------------------------------------------------
+"""
+    sh("""
+        git config user.name '${tagUserName}'
+        git config user.email '${tagUserEmail}'
+        git tag -a ${tagName} -m 'Tagging ${tagName}.'
+    """)
+
+    try {
+        withCredentials([usernamePassword(credentialsId: 'kie-ci', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
+            sh("""
+                git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
+                git push origin ${tagName}
+            """)
+        }
+    } catch (Exception e) {
+        println "[ERROR] Can't push existing tag ${tagName} to remote."
+        throw e;
+    }
+    println "[INFO] Pushed commit '${currentCommit}' as tag ${tagName} to remote."
+}
+
 def getCommit() {
     return sh(returnStdout: true, script: 'git log --oneline -1').trim()
 }
