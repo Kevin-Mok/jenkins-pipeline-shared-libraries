@@ -43,21 +43,23 @@ def getRepositoryScm(String repository, String author, String branches) {
 }
 
 def mergeSourceIntoTarget(String repository, String sourceAuthor, String sourceBranches, String targetAuthor, String targetBranches) {
-    println "[INFO] Merging source [${repository}/${sourceAuthor}:${sourceBranches}] into target [${repository}/${targetAuthor}:${targetBranches}]..."
+    println "[INFO] Merging source [${sourceAuthor}/${repository}:${sourceBranches}] into target [${targetAuthor}/${repository}:${targetBranches}]..."
     checkout(resolveRepository(repository, targetAuthor, targetBranches, false))
     def targetCommit = getCommit()
 
     try {
-        sh "git pull git://github.com/${sourceAuthor}/${repository} ${sourceBranches}"    
+        withCredentials([usernameColonPassword(credentialsId: 'kie-ci', variable: 'kieCiUserPassword')]) {
+            sh "git pull git://$kieCiUserPassword@github.com/${sourceAuthor}/${repository} ${sourceBranches}"
+        }
     } catch (Exception e) {
         println """
--------------------------------------------------------------
-[ERROR] Can't merge source into Target. Please rebase PR branch.
--------------------------------------------------------------
-Source: git://github.com/${sourceAuthor}/${repository} ${sourceBranches}
-Target: ${targetCommit}
--------------------------------------------------------------
-"""
+        -------------------------------------------------------------
+        [ERROR] Can't merge source into Target. Please rebase PR branch.
+        -------------------------------------------------------------
+        Source: git://github.com/${sourceAuthor}/${repository} ${sourceBranches}
+        Target: ${targetCommit}
+        -------------------------------------------------------------
+        """
         throw e;
     }
     def mergedCommit = getCommit()
@@ -89,9 +91,9 @@ Tag: ${tagName}
         git config user.email '${tagUserEmail}'
         git tag -a ${tagName} -m 'Tagging ${tagName}.'
     """)
-    
+
     try {
-        withCredentials([usernamePassword(credentialsId: 'jenkins-kogito', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){    
+        withCredentials([usernamePassword(credentialsId: 'kie-ci', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
             sh("""
                 git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
                 git push origin ${tagName}
