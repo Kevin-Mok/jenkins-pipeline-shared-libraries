@@ -74,12 +74,17 @@ def mergeSourceIntoTarget(String repository, String sourceAuthor, String sourceB
     """
 }
 
-def tagRepository(String tagUserName, String tagUserEmail, String tagName) {
+// Optional: Pass in $BUILD_TAG as buildTag in pipeline
+// script to trace back the build from which this tag came
+// from.
+def tagRepository(String tagUserName, String tagUserEmail, String tagName, String buildTag = '') {
     def currentCommit = getCommit()
+    def tagMessageEnding = buildTag ? " in build '${buildTag}'." : '.' 
+    def tagMessage = "Tagged by Jenkins${tagMessageEnding}"
     sh("""
         git config user.name '${tagUserName}'
         git config user.email '${tagUserEmail}'
-        git tag -a ${tagName} -m 'Tagging ${tagName}.'
+        git tag -a '${tagName}' -m '${tagMessage}'
     """)
     println """
 -------------------------------------------------------------
@@ -88,6 +93,7 @@ def tagRepository(String tagUserName, String tagUserEmail, String tagName) {
 Commit: ${currentCommit}
 Tagger: ${tagUserName} (${tagUserEmail})
 Tag: ${tagName}
+Tag Message: ${tagMessage}
 -------------------------------------------------------------
 """
 }
