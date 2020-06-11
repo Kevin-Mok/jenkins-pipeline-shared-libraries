@@ -1,7 +1,7 @@
 def resolveRepository(String repository, String author, String branches, boolean ignoreErrors) {
     return resolveScm(
             source: github(
-                    credentialsId: 'jenkins-kogito',
+                    credentialsId: 'kie-ci',
                     repoOwner: author,
                     repository: repository,
                     traits: [[$class: 'org.jenkinsci.plugins.github_branch_source.BranchDiscoveryTrait', strategyId: 3],
@@ -74,36 +74,37 @@ def mergeSourceIntoTarget(String repository, String sourceAuthor, String sourceB
     """
 }
 
-def tagRepository(String repository, String author, String branch, String tagUserName, String tagUserEmail, String tagName) {
-    checkout(resolveRepository(repository, author, branch, false))
+def tagRepository(String tagUserName, String tagUserEmail, String tagName) {
     def currentCommit = getCommit()
+    sh("""
+        git config user.name '${tagUserName}'
+        git config user.email '${tagUserEmail}'
+        git tag -a ${tagName} -m 'Tagging ${tagName}.'
+    """)
     println """
 -------------------------------------------------------------
-[INFO] Tagging ${author}/${repository}:${branch}
+[INFO] Tagged current repository
 -------------------------------------------------------------
 Commit: ${currentCommit}
 Tagger: ${tagUserName} (${tagUserEmail})
 Tag: ${tagName}
 -------------------------------------------------------------
 """
-    sh("""
-        git config user.name '${tagUserName}'
-        git config user.email '${tagUserEmail}'
-        git tag -a ${tagName} -m 'Tagging ${tagName}.'
-    """)
+}
 
+def pushObject(String remote, String object, String credentialsId = 'kie-ci') {
     try {
-        withCredentials([usernamePassword(credentialsId: 'kie-ci', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
+        withCredentials([usernamePassword(credentialsId: "${credentialsId}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
             sh("""
                 git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
-                git push origin ${tagName}
+                git push ${remote} ${object}
             """)
         }
     } catch (Exception e) {
-        println "[ERROR] Can't push existing tag ${tagName} to remote."
+        println "[ERROR] Can't push existing object '${object}' to ${remote}."
         throw e;
     }
-    println "[INFO] Pushed commit '${currentCommit}' as tag ${tagName} to remote."
+    println "[INFO] Pushed object '${object}' to ${remote}."
 }
 
 def getCommit() {
