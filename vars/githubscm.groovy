@@ -161,7 +161,7 @@ def pushObject(String remote, String object, String credentialsId = 'kie-ci') {
             sh("git push ${remote} ${object}")
         }
     } catch (Exception e) {
-        println "[ERROR] Can't push existing object '${object}' to ${remote}."
+        println "[ERROR] Couldn't push object '${object}' to ${remote}."
         throw e;
     }
     println "[INFO] Pushed object '${object}' to ${remote}."

@@ -16,15 +16,9 @@ class GithubScmSpec extends JenkinsPipelineSpecification {
         // shared setup for pushObject  
         explicitlyMockPipelineVariable("GIT_USERNAME")
         explicitlyMockPipelineVariable("GIT_PASSWORD")
-        /* getPipelineMock("usernamePassword")(_) >> {
-            return 'usernamePassword'
-        }
-        getPipelineMock("withCredentials")("usernamePassword") >> {
-            return 'credentials'
-        } */
     }
 
-    /* def "[githubscm.groovy] tagRepository with buildTag"() {
+    def "[githubscm.groovy] tagRepository with buildTag"() {
         when:
             groovyScript.tagRepository('userName', 'user@email.com', 'tagName', 'buildTag')
         then:
@@ -33,55 +27,46 @@ class GithubScmSpec extends JenkinsPipelineSpecification {
             1 * getPipelineMock("sh")("git tag -a 'tagName' -m 'Tagged by Jenkins in build \"buildTag\".'")
     }
 
-    def "[githubscm.groovy] tag repository without build tag"() {
+    def "[githubscm.groovy] tagRepository without buildTag"() {
         when:
             groovyScript.tagRepository('userName', 'user@email.com', 'tagName')
         then:
             1 * getPipelineMock("sh")("git config user.name 'userName'")
             1 * getPipelineMock("sh")("git config user.email 'user@email.com'")
             1 * getPipelineMock("sh")("git tag -a 'tagName' -m 'Tagged by Jenkins.'")
-    } */
+    }
 
     def "[githubscm.groovy] pushObject without credentialsId"() {
-        setup:
-            getPipelineMock("usernamePassword")(['credentialsId': 'kie-ci', 'usernameVariable':'GIT_USERNAME', 'passwordVariable':'GIT_PASSWORD']) >> {
-                return 'kie-ci'
-            }
-            getPipelineMock("withCredentials")("kie-ci") >> {
-                return 'kie-creds'
-            }
         when:
             groovyScript.pushObject('remote', 'object')
         then:
-            1 * getPipelineMock("usernamePassword")(['credentialsId': 'kie-ci', 'usernameVariable':'GIT_USERNAME', 'passwordVariable':'GIT_PASSWORD'])
-            1 * getPipelineMock("withCredentials")("kie-ci")
+            1 * getPipelineMock("usernamePassword.call").call(['credentialsId': 'kie-ci', 'usernameVariable':'GIT_USERNAME', 'passwordVariable':'GIT_PASSWORD'])
+            1 * getPipelineMock("withCredentials")(_)
             1 * getPipelineMock("sh")("git config --local credential.helper \"!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f\"")
             1 * getPipelineMock("sh")("git push remote object")
     }
 
-    /* def "[githubscm.groovy] push object with credentials"() {
-        setup:
-        groovyScript.getBinding().setVariable("GIT_USERNAME", 'username')
-        groovyScript.getBinding().setVariable("GIT_PASSWORD", 'password')
+    def "[githubscm.groovy] pushObject with credentialsId"() {
         when:
-        groovyScript.pushObject('remote', 'object', 'other-credentials')
+            groovyScript.pushObject('remote', 'object', 'credsId')
         then:
-        1 * getPipelineMock("withCredentials")([usernamePassword(credentialsId: 'other-credentials', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')])
-        1 * getPipelineMock("sh")("""
-        git config --local credential.helper .... and so on
-    """)
+            1 * getPipelineMock("usernamePassword.call").call(['credentialsId': 'credsId', 'usernameVariable':'GIT_USERNAME', 'passwordVariable':'GIT_PASSWORD'])
+            1 * getPipelineMock("withCredentials")(_)
+            1 * getPipelineMock("sh")("git config --local credential.helper \"!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f\"")
+            1 * getPipelineMock("sh")("git push remote object")
     }
 
     def "[githubscm.groovy] push object exception"() {
         setup:
-        groovyScript.getBinding().setVariable("GIT_USERNAME", 'username')
-        groovyScript.getBinding().setVariable("GIT_PASSWORD", 'password')
-        getPipelineMock("sh")(_) >> {
-            throw new Exception("amazing exception")
-        }
+            getPipelineMock("sh")("git push remote object") >> {
+                throw new Exception("error when pushing")
+            }
         when:
-        groovyScript.pushObject('remote', 'object', 'other-credentials')
-        then:        
-        thrown(Exception)
-    } */
+            groovyScript.pushObject('remote', 'object')
+        then:
+            1 * getPipelineMock("usernamePassword.call").call(['credentialsId': 'kie-ci', 'usernameVariable':'GIT_USERNAME', 'passwordVariable':'GIT_PASSWORD'])
+            1 * getPipelineMock("withCredentials")(_)
+            1 * getPipelineMock("sh")("git config --local credential.helper \"!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f\"")
+            thrown(Exception)
+    }
 }
