@@ -128,13 +128,16 @@ def mergePR(String pullRequestLink, String credentialID='kie-ci') {
 // to trace back the build from which this tag came from.
 def tagRepository(String tagUserName, String tagUserEmail, String tagName, String buildTag = '') {
     def currentCommit = getCommit()
-    def tagMessageEnding = buildTag ? " in build '${buildTag}'." : '.' 
+    def tagMessageEnding = buildTag ? " in build \"${buildTag}\"." : '.' 
     def tagMessage = "Tagged by Jenkins${tagMessageEnding}"
-    sh("""
+    /* sh("""
         git config user.name '${tagUserName}'
         git config user.email '${tagUserEmail}'
         git tag -a '${tagName}' -m '${tagMessage}'
-    """)
+    """) */
+    sh "git config user.name '${tagUserName}'"
+    sh "git config user.email '${tagUserEmail}'"
+    sh "git tag -a '${tagName}' -m '${tagMessage}'"
     println """
 -------------------------------------------------------------
 [INFO] Tagged current repository
