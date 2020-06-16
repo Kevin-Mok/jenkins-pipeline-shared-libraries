@@ -153,10 +153,12 @@ Tag Message: ${tagMessage}
 def pushObject(String remote, String object, String credentialsId = 'kie-ci') {
     try {
         withCredentials([usernamePassword(credentialsId: "${credentialsId}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]){
-            sh("""
+            /* sh("""
                 git config --local credential.helper "!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f"
                 git push ${remote} ${object}
-            """)
+            """) */
+            sh("git config --local credential.helper \"!f() { echo username=\\$GIT_USERNAME; echo password=\\$GIT_PASSWORD; }; f\"")
+            sh("git push ${remote} ${object}")
         }
     } catch (Exception e) {
         println "[ERROR] Can't push existing object '${object}' to ${remote}."
