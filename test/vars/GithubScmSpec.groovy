@@ -20,7 +20,7 @@ class GithubScmSpec extends JenkinsPipelineSpecification {
 
     def "[githubscm.groovy] tagRepository with buildTag"() {
         when:
-            groovyScript.tagRepository('userName', 'user@email.com', 'tagName', 'buildTag')
+            groovyScript.tagRepository('user', 'user@email.com', 'tagName', 'buildTag')
         then:
             1 * getPipelineMock("sh")("git config user.name 'userName'")
             1 * getPipelineMock("sh")("git config user.email 'user@email.com'")
