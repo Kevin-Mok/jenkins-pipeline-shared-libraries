@@ -195,3 +195,17 @@ GIT INFORMATION REPORT
         println '[WARNING] The variable GIT_INFORMATION_REPORT does not exist'
     }
 }
+
+
+/**
+ *
+ * Calculate next snapshot version based on current version.
+ *
+ * @param curVersion Current version used to calculate next snapshot version. Expected to follow the format "x.y.z" where x, y and z are integers.
+ */
+def calcSnapshotVersion(String curVersion) {
+    String[] xyz = curVersion.split("\\.")
+    xyz[2] = xyz[2].toInteger() + 1
+    return xyz.join('.') + "-SNAPSHOT"
+}
+
