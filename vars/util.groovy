@@ -195,3 +195,14 @@ GIT INFORMATION REPORT
         println '[WARNING] The variable GIT_INFORMATION_REPORT does not exist'
     }
 }
+
+def getNextSnapshot(String version)
+{
+    String delimeter= "\\.\\s*"
+    String [] xyz = version.split(delimeter)
+    int z = Integers.parseInt(xyz[2])
+    z = z + 1
+    xyz[2] = z.toString()
+    String v = xyz[0] + "." + xyz[1] + "." + xyz[2] + "-snapshot"
+    return v
+}
