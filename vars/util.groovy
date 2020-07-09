@@ -198,11 +198,18 @@ GIT INFORMATION REPORT
 
 def getNextSnapshot(String version)
 {
-    String delimeter= "\\.\\s*"
-    String [] xyz = version.split(delimeter)
-    int z = Integers.parseInt(xyz[2])
-    z = z + 1
-    xyz[2] = z.toString()
-    String v = xyz[0] + "." + xyz[1] + "." + xyz[2] + "-snapshot"
-    return v
+    String [] versionSplit = version.split("\\.")
+    
+    if(versionSplit.length == 3)
+    {
+        int majorVersion = Integer.parseInt(versionSplit[0])
+        int minorVersion = Integer.parseInt(versionSplit[1])
+        int microVersion = Integer.parseInt(versionSplit[2])
+
+        return "${majorVersion}.${minorVersion}.${microVersoin+1}-SNAPSHOT"
+    } 
+    else
+    {
+        error "Version is not in the format X.Y.Z"
+    }
 }
