@@ -204,7 +204,7 @@ def getNextSnapshot(String version) {
         int minorVersion = Integer.parseInt(versionSplit[1])
         int microVersion = Integer.parseInt(versionSplit[2])
 
-        return "${majorVersion}.${minorVersion}.${microVersoin+1}-SNAPSHOT"
+        return "${majorVersion}.${minorVersion}.${microVersion+1}-SNAPSHOT"
     }  else {
         error "Version is not in the format X.Y.Z"
     }
