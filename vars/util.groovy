@@ -196,20 +196,16 @@ GIT INFORMATION REPORT
     }
 }
 
-def getNextSnapshot(String version)
-{
+def getNextSnapshot(String version) {
     String [] versionSplit = version.split("\\.")
     
-    if(versionSplit.length == 3)
-    {
+    if(versionSplit.length == 3) {
         int majorVersion = Integer.parseInt(versionSplit[0])
         int minorVersion = Integer.parseInt(versionSplit[1])
         int microVersion = Integer.parseInt(versionSplit[2])
 
         return "${majorVersion}.${minorVersion}.${microVersoin+1}-SNAPSHOT"
-    } 
-    else
-    {
+    }  else {
         error "Version is not in the format X.Y.Z"
     }
 }
