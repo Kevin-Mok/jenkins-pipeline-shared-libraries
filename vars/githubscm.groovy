@@ -177,3 +177,7 @@ def getRemoteInfo(String remoteName, String configName) {
 def cleanHubAuth(){
     sh "rm -rf ~/.config/hub"
 }
+
+def getGlobalGitUser(){
+    echo env.GIT_COMMITTER_NAME
+}
