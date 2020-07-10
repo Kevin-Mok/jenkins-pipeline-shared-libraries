@@ -84,9 +84,8 @@ def createBranch(String branchName) {
     println "[INFO] Created branch '${branchName}' on repo."
 }
 
-def commitChanges(String userName, String userEmail, String commitMessage, String filesToAdd = '--all') {
-    sh "git config user.name '${userName}'"
-    sh "git config user.email '${userEmail}'"
+def commitChanges(String commitMessage, String filesToAdd = '--all', String gitUserName=env.GIT_COMMITTER_NAME, String gitUserEmail=env.GIT_COMMITTER_EMAIL) {
+    setGitCommitter(gitUserName, gitUserEmail)
     sh "git add ${filesToAdd}"
     sh "git commit -m '${commitMessage}'"
 }
@@ -115,8 +114,14 @@ def createPR(String pullRequestMessage, String targetBranch='master', String cre
     }
 }
 
-def mergePR(String pullRequestLink, String credentialID='kie-ci') {
+def setGitCommitter(String gitUserName, String gitUserEmail) {
+    sh "git config user.name '${gitUserName}'"
+    sh "git config user.email '${gitUserEmail}'"
+}
+
+def mergePR(String pullRequestLink, String credentialID='kie-ci', String gitUserName=env.GIT_COMMITTER_NAME, String gitUserEmail=env.GIT_COMMITTER_EMAIL) {
     cleanHubAuth()
+    setGitCommitter(gitUserName, gitUserEmail)
     withCredentials([usernamePassword(credentialsId: credentialID, usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_PASSWORD')]){
         try{
             sh "hub merge ${pullRequestLink}"
@@ -128,21 +133,20 @@ def mergePR(String pullRequestLink, String credentialID='kie-ci') {
     }
 }
 
-// Optional: Pass in $BUILD_TAG as buildTag in pipeline script 
+// Optional: Pass in env.BUILD_TAG as buildTag in pipeline script 
 // to trace back the build from which this tag came from.
-def tagRepository(String tagUserName, String tagUserEmail, String tagName, String buildTag = '') {
+def tagRepository(String tagName, String buildTag = '', String gitUserName=env.GIT_COMMITTER_NAME, String gitUserEmail=env.GIT_COMMITTER_EMAIL) {
     def currentCommit = getCommit()
     def tagMessageEnding = buildTag ? " in build \"${buildTag}\"." : '.'
     def tagMessage = "Tagged by Jenkins${tagMessageEnding}"
-    sh "git config user.name '${tagUserName}'"
-    sh "git config user.email '${tagUserEmail}'"
+    setGitCommitter(gitUserName, gitUserEmail)
     sh "git tag -a '${tagName}' -m '${tagMessage}'"
     println """
 -------------------------------------------------------------
 [INFO] Tagged current repository
 -------------------------------------------------------------
 Commit: ${currentCommit}
-Tagger: ${tagUserName} (${tagUserEmail})
+Tagger: ${gitUserName} (${gitUserEmail})
 Tag: ${tagName}
 Tag Message: ${tagMessage}
 -------------------------------------------------------------
