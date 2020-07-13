@@ -254,7 +254,8 @@
                                         <directory>test</directory>
                                         <includes>
                                             <!-- <include>**/*.groovy</include> -->
-                                            <include>vars/JenkinsfileDeployNew.groovy</include>
+                                            <!-- <include>vars/JenkinsfileDeployNew.groovy</include> -->
+                                            <include>vars/JenkinsfilePromote.groovy</include>
                                             <!-- <include>GithubScmSpec.groovy</include> -->
                                         </includes>
                                     </testSource>
@@ -281,6 +282,7 @@
                 <includes>
                     <include>vars/**/*.groovy</include>
                     <include>Jenkinsfile.deploy.new</include>
+                    <include>Jenkinsfile.promote</include>
                 </includes>
                 <directory>${project.basedir}</directory>
             </testResource>
