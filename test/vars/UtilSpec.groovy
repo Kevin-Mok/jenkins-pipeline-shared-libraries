@@ -423,4 +423,11 @@ class UtilSpec extends JenkinsPipelineSpecification {
         then:
         true
     }
+
+    def "[util.groovy] getNextSnapshot"() {
+        when:
+        def snapshotVersion = groovyScript.getNextSnapshot('0.12.0')
+        then:
+        snapshotVersion == '0.12.1-SNAPSHOT'
+    }  
 }

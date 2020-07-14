@@ -195,3 +195,17 @@ GIT INFORMATION REPORT
         println '[WARNING] The variable GIT_INFORMATION_REPORT does not exist'
     }
 }
+
+def getNextSnapshot(String version) {
+    String [] versionSplit = version.split("\\.")
+    
+    if(versionSplit.length == 3) {
+        int majorVersion = Integer.parseInt(versionSplit[0])
+        int minorVersion = Integer.parseInt(versionSplit[1])
+        int microVersion = Integer.parseInt(versionSplit[2])
+
+        return "${majorVersion}.${minorVersion}.${microVersion+1}-SNAPSHOT"
+    }  else {
+        error "Version is not in the format X.Y.Z"
+    }
+}
